@@ -19,6 +19,41 @@ the upstream community repository. Remove an item when it is done.
 - **Network Enforcer chart.** `{network-enforcer-helm-chart}` is a guess,
   `oci://dp.apps.rancher.io/charts/suse-security-network-enforcer`. No page
   uses it at the moment.
+- **Hauler manifest signing identity.** `:hauler-manifest-cert-identity:` in
+  the `admission-controller` 1.39 `variables.adoc` is a placeholder. Fill it
+  in when the SUSE CI signs the manifest
+  ([rancher/suse-security#118](https://github.com/rancher/suse-security/issues/118)).
+- **Hauler manifest signing check.** When
+  [rancher/suse-security#118](https://github.com/rancher/suse-security/issues/118)
+  decides the signing workflow, check that an exact `--certificate-identity`
+  is enough. If the workflow signs from tags or from a reusable workflow,
+  switch to `--certificate-identity-regexp` with
+  `--certificate-github-workflow-repository` and
+  `--certificate-github-workflow-ref`. Add the values as attributes. Also
+  state a minimum cosign version, after you test it with the real bundle.
+- **Hauler manifest attachments.** The links to the manifest and the bundle in
+  `airgap-hauler.adoc` stay broken until the first pull request of the
+  `Update Hauler manifest` workflow is merged. Merge in this order: the
+  workflow, then its first pull request, which adds the attachments, and only
+  then the docs pages that link the files. Until then, each language build
+  logs two `target of xref not found` errors, 14 in total, and
+  `scripts/build-report.sh` makes the sync pull requests drafts. When a new
+  docs version opens, move the destination in
+  `updatecli/values.d/hauler-manifest.yaml`.
+- **Hauler example image names.** The shared upstream partial
+  `partials/airgap/hauler-save.adoc` shows example image names, for example
+  `policy-server` and kyverno. The product image names are different, for
+  example `kubewarden-policy-server`. Decide if the partial needs a product
+  version.
+- **Hauler partial in new versions.** `scripts/sync.py` copies only the `en`
+  product-specific files to a new component version (`new_versions`). The
+  language placeholder `02-hauler.adoc` of the next version needs
+  `partials/product-specific/airgap-hauler.adoc` in each language module.
+  Without it, the build fails.
+- **Air gap requirements in translations.** The translated
+  `01-requirements.adoc` pages do not include `airgap-requirements.adoc`.
+  When the translations are updated to include it, copy the partial to those
+  language modules.
 
 ## Content
 

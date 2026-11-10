@@ -19,3 +19,11 @@
 // See follow-ups.adoc in the repository root.
 :release-tag: v1.38.2
 :chart-version: 6.1.0
+
+// The file names must match the values in updatecli/values.d/hauler-manifest.yaml.
+// The identity is a placeholder until the SUSE CI signs the manifest.
+// See rancher/suse-security#118.
+:hauler-manifest-file: hauler_manifest.yaml
+:hauler-manifest-bundle: hauler_manifest_cosign.bundle
+:hauler-manifest-cert-identity: TBD-see-rancher-suse-security-118
+:hauler-manifest-oidc-issuer: https://token.actions.githubusercontent.com
