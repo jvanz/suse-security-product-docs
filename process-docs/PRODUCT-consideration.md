@@ -170,6 +170,80 @@ branch and no pull request.
 [what-can-go-wrong.md](what-can-go-wrong.md) describes how the sync can fail
 or give a wrong result, and how you find out.
 
+### Hauler manifest copy
+
+Hauler is a tool that moves images, charts and other files into an air-gapped
+environment. A Hauler manifest lists all the artifacts of the admission
+controller and its policies. A cosign bundle holds the signature of the
+manifest and the signing certificate. The documentation links the manifest and
+its bundle. The two files come from the private repository
+`rancher/suse-security`, branch `main`. The upstream repository cannot read a
+private repository, so the copy runs here and not in `kubewarden/docs`.
+
+The `Update Hauler manifest` workflow,
+`.github/workflows/update-hauler-manifest.yml`, does the copy. It uses
+Updatecli, like the reference documentation copy in `kubewarden/docs`.
+
+1. The workflow runs every Monday and Wednesday at 00:00 UTC. You can also
+   start it from the Actions tab or with
+   `gh workflow run update-hauler-manifest.yml`. It runs only on the `main`
+   branch.
+2. Updatecli reads `hauler_manifest.yaml` and `hauler_manifest_cosign.bundle`
+   from `rancher/suse-security`.
+3. Updatecli writes both files to a working branch and opens one pull request.
+   If the files did not change, Updatecli opens no pull request.
+
+The pages link the files with `xref:en:attachment$product-specific/...`. The
+files exist in the `en` module only, in the `attachments/product-specific/`
+directory of a component version. The language modules link to them, so the
+`en:` module coordinate is required in the xref.
+
+To set up the workflow, do these steps:
+
+1. Create a GitHub App. Install it on `rancher/suse-security` and on
+   `rancher/suse-security-product-docs`.
+2. Give the App the permissions Contents (read and write) and Pull requests
+   (read and write).
+3. Add the App ID and the private key to this repository as the secrets
+   `APP_ID` and `APP_PRIVATE_KEY`.
+
+The workflow creates two tokens from the App. The first token has read-only
+access to the Contents of `rancher/suse-security`. Updatecli uses it to read
+the two files. The second token has write access to the Contents and the pull
+requests of this repository. Updatecli uses it to push the working branch and
+to open the pull request. The permissions of the App apply to every
+installation of the App, so the App itself still has write permission on
+`rancher/suse-security`. The workflow never asks for a token that can write
+there. To remove the write permission on `rancher/suse-security` completely,
+create a separate read-only App and install it on `rancher/suse-security`.
+
+The name of the source repository in the workflow, `suse-security`, must match
+`source.repository` in `updatecli/values.d/hauler-manifest.yaml`. The workflow
+cannot read the values file.
+
+All the other configuration is in `updatecli/values.d/hauler-manifest.yaml`:
+the source branch and file paths, the destination directory and file names, and
+the pull request title and labels. If the files move in
+`rancher/suse-security`, change the source paths in that file.
+
+The destination directory is in one component version, now
+`docs/admission-controller/version-1.39`. When a new docs version opens,
+change the directory in `updatecli/values.d/hauler-manifest.yaml` to the new
+dev version.
+
+Merge in this order:
+
+1. Merge the pull request that adds the workflow, and run the workflow.
+2. Merge the first pull request of the workflow. It adds the two files.
+3. Merge the docs pages that link the files.
+
+Until the files exist, each language build logs two `target of xref not found`
+errors, 14 in total. The script `scripts/build-report.sh` then makes the sync
+pull requests drafts.
+
+Before you merge a pull request of the workflow, run the `cosign verify-blob`
+command on the two files. The command is in `airgap-hauler.adoc`.
+
 ### Why copy and sync
 
 The product side receives all the upstream content, but it needs its own
